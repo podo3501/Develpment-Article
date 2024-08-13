@@ -1,0 +1,23 @@
+//콘솔창을 강제 종료할 경우 정상종료가 아니라 메모리가 새는 부분이 생긴다. 
+//이렇게 하면 종료할때 이 부분을 거쳐가게 되어 소멸자가 호출되게 된다.
+BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)
+{
+	switch (fdwCtrlType)
+	{
+	case CTRL_C_EVENT: //CTRL + C
+	case CTRL_CLOSE_EVENT: //Close Action
+	case CTRL_BREAK_EVENT: //CTRL + Pause Break
+	case CTRL_LOGOFF_EVENT: //System Logoff
+	case CTRL_SHUTDOWN_EVENT: //System power off
+		break;
+	default: 
+		break;
+	}
+	return TRUE;
+}
+
+int __cdecl main(void)
+{
+	SetConsoleCtrlHandler(CtrlHandler, TRUE);
+	return 0;
+}

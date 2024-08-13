@@ -1,3 +1,85 @@
+SEH exception with code 0x87d thrown in the test body.
+구글테스트에서 이런 문제가 발생했다.
+코드에서 메모리 침범이 일어났다.
+문제는 static  변수를 쓴 것이었는데 테스트 코드의 특성상 몇번씩 다시 실행을 시키는데
+static변수가 초기화 되지 않고 계속해서 더해져서 메모리 침범이 일어났다.
+그래서 저 exception이 잡아주는 모양이다.
+
+구글테스트에서 work Directory가 안 맞을때에는
+도구->옵션->Test Adapter for Google Test 에 가서 설정을 변경한다.
+
+셰이더의 내용물(b, t, s, u 레지스터)은 늘 자료가 있다고 가정한다.
+남아서 넘치는 건 상관없지만 셰이더 데이터에 빈공간이 있으면 안된다.
+
+구글테스트에서 프로젝트 링크에러가 나면 프로젝트->참조에서 걸어주자.
+
+unique_ptr은 pImpl을 쓰고 싶게(전방선언을 하고싶게) 만드는데 여기서 문제점은
+unique_ptr은 raw포인터와 같아서 delete방식을 알고 있어야 한다. 즉 소멸자가 정의되지 않으면
+오류 C2027 정의되지 않은 형식 '클래스명'을(를) 사용했습니다. 라고 나온다.
+그러면 소멸자를 cpp에서 정의해 주면 되긴한데 문제는 생성자가 template인 경우는 이게 또 말썽이다
+그래서 template 생성자를 cpp에 명시적으로 선언해 주거나 아니면 중요한 게 아닐 경우는 생성자에 
+template를 안 쓰는게 좋은 것 같다.  그리고 에러 메세지가 꼭 저렇게 안나오고 애매하게 나오는 경우도
+있으니 주의를 요함
+생성자 소멸자 둘다 cpp에 정의한다. h에 = default 해도 소용없음 
+*변수를 h에 선언할때 초기화 할수 있는데 초기화를 하면 cpp에 정의해도 필요없게 됨. 선언과 동시에 초기화를
+하지 않아야 함.ex) std::unique_ptr<Material> m_materials{ nullptr }; <-- m_materials{ nullptr } 중괄호 없애야함.
+
+microsoft c++ 예외: poco::notfoundexception 출력창에 나왔는데 nvdia 디바이스 업데이트 이후 없어짐
+
+구글테스트에서 window msg 처리를 안 하고 풀 테스트를 할 경우 그 메세지가 살아남아서 다른 테스트에
+영향을 끼침. 그래서 소멸자에 메세지를 처리하도록(리스너 제거) 하니 정상적으로 동작함
+
+C1189: #error:  "No Target Architecture" include <windows.h> 하자
+
+새로운 것을 추가하면 버그가 생기고 버그가 생긴 부분을 테스트코드에 확인차 넣을려고 하면, 안되는 경우들이 있다.
+새로운 구조가 필요해서 그런 것인데, 새로운 구조를 하지 않고서도 간단히 고칠수도 있지만, 결국에는 새로운
+구조로 가게 되어 있고, 새로운 구조로 가고(리팩토링후) 테스트 코드를 작성한 후에 통과되는지 확인한다.
+
+matrix 초기화를 0.0로 다 해서 좌표가 다 날라갔다. 초기화를 대각선으로 1.0을 하자
+
+1>C:\Test\C++\Modules\main.cpp(1,16): warning C5050: Possible incompatible environment while importing module 'std.core': _GUARDOVERFLOW_CRT_ALLOCATORS=1 is defined in current command line and not in module command line
+1>C:\Test\C++\Modules\main.cpp(1,16): warning C5050: Possible incompatible environment while importing module 'std.core': _DEBUG is defined in current command line and not in module command line
+1>C:\Test\C++\Modules\main.cpp(1,16): warning C5050: Possible incompatible environment while importing module 'std.core': _M_FP_PRECISE is defined in current command line and not in module command line
+To solve the first warning change SDL Checks to No (/sdl-).
+To solve the second warning, remove the _DEBUG preprocessor definition.
+To solve the third warning, delete the value of the Floating Point Model (which was, by default, set to /fp:precise in my case).
+모듈을 적용시키고 싶었으나 아직까지는 시기 상조인것 같다.
+
+ C2855: '/std:c++' 명령줄 옵션이 미리 컴파일된 헤더와 일치하지 않습니다. 
+ 옵션을 맞춰도 계속 이런 에러가 나오면 해당 cpp를 프로젝트에서 제거후 정리 및 재컴파일 후 cpp를 다시 불러와서 컴파일 한다.
+
+쉐이더 파일안에 include는 절대 경로 아니면 불러들인 파일에서 상대 경로인데, 파일을 몇개로
+나눌려고 시도했다가 인클루드 한 파일에 인클루드 하면 이게 불러지지 않는다. 디렉토리가 맞지 않아서 불러지지 않는데
+왜 이렇게 만들었는지 궁금하다. include는 그냥 그 파일 내용을 갖다 붙이는 define 같은 느낌이다.
+해결책은 ID3DInclude 이 인터페이스 함수를 재작성해서 인자로 넣어주면 #include 문이 실행될때 여기로 들어온다.
+그리고 읽고나면 소멸자로 들어오기 때문에 stack으로 구현했다.
+여기서 파일의 디렉토리를 설정하고 파일을 읽어서 넣어주면 된다.
+
+D3D12 WARNING: Live ID3D12Device at 0x000001F10019C2F0, Refcount: 2 [ STATE_CREATION WARNING #274: LIVE_DEVICE]
+D3D12 WARNING: 	Live ID3D12ShaderCacheSession at 0x000001F10044B5C0, Refcount: 0, IntRef: 1 [ STATE_CREATION WARNING #1281: LIVE_SHADERCACHESESSION]
+D3D12 WARNING: 	Live ID3D12RootSignature at 0x000001F1004E2460, Refcount: 0, IntRef: 2 [ STATE_CREATION WARNING #577: LIVE_ROOTSIGNATURE]
+D3D12 WARNING: 	Live ID3D12PipelineState at 0x000001F1004FEAD0, Refcount: 0, IntRef: 1 [ STATE_CREATION WARNING #572: LIVE_PIPELINESTATE]
+D3D12 WARNING: 	Live ID3D12PipelineState at 0x000001F1004F9150, Refcount: 0, IntRef: 1 [ STATE_CREATION WARNING #572: LIVE_PIPELINESTATE]
+D3D12 WARNING: 	Live ID3D12Resource at 0x000001F100563290, Refcount: 0, IntRef: 1 [ STATE_CREATION WARNING #575: LIVE_RESOURCE]
+D3D12 WARNING: 	Live ID3D12Heap at 0x000001F100501220, Refcount: 0, IntRef: 1 [ STATE_CREATION WARNING #579: LIVE_HEAP]
+D3D12 WARNING: 	Live ID3D12Fence at 0x000001F100549D90, Refcount: 0, IntRef: 1 [ STATE_CREATION WARNING #580: LIVE_MONITOREDFENCE]
+D3D12 WARNING: 	Live ID3D12CommandQueue at 0x000001F10054A030, Refcount: 0, IntRef: 1 [ STATE_CREATION WARNING #570: LIVE_COMMANDQUEUE]
+D3D12 WARNING: 	Live ID3D12Fence at 0x000001F1006CF130, Name: Internal D3D12 Debug Fence, Refcount: 0, IntRef: 1 [ STATE_CREATION WARNING #580: LIVE_MONITOREDFENCE]
+D3D12 WARNING: 	Live ID3D12RootSignature at 0x000001F106A6AE40, Refcount: 1, IntRef: 0 [ STATE_CREATION WARNING #577: LIVE_ROOTSIGNATURE]
+D3D12 WARNING: 	Live ID3D12RootSignature at 0x000001F106A6E670, Refcount: 1, IntRef: 0 [ STATE_CREATION WARNING #577: LIVE_ROOTSIGNATURE]
+이렇게 DirectX12에서 메모리가 센다는 메세지가 떴다. 여기서 Refcount와 IntRef가 있는데 앞에 Refcount가 0이면 메모리가 세지는 않는다는 것.
+Refcount가 0이 아닌 것을 먼저 잡고나면 Refcount가 0인 것들은 warning으로 안뜬다. 아마도 1이 하나라도 있다면 0값도 같이 뜨는 것 같다.
+	ID3D12RootSignature* signature = nullptr;
+	ReturnIfFailed(m_device->CreateRootSignature(0, serialized->GetBufferPointer(), serialized->GetBufferSize(),
+		IID_PPV_ARGS(&signature)));
+	m_rootSignatures.insert(std::make_pair(type, signature));
+이런식으로 signature값으로 생성한다음 map에 넣었는데 이것이 메모리 세는 문제의 근원이었다.
+밑에서 Refcount가 1이상인 값을 차례대로 잡아 올라가면 된다.
+
+Test Adapter for Google Test에서 work directory 셋팅하는 부분은 다수의 솔루션일때는 문제가 된다.
+그래서 directory를 $(SolutionDir) 로 설정하고 거기에 맞게 디렉토리를 수정해야 한다.
+예약어가 몇개 없어서 SolutionDir로 했다. ProjectDir 이런게 없었다.
+
 //콘솔창을 강제 종료할 경우 정상종료가 아니라 메모리가 새는 부분이 생긴다. 
 //이렇게 하면 종료할때 이 부분을 거쳐가게 되어 소멸자가 호출되게 된다.
 BOOL WINAPI CtrlHandler(DWORD fdwCtrlType)

@@ -103,3 +103,5 @@ int __cdecl main(void)
 	SetConsoleCtrlHandler(CtrlHandler, TRUE);
 	return 0;
 }
+
+assert의 이점은 디버그 모드일때 자료가 있는지 확인해 보거나 값이 정당한지 확인할때 유용하다. release모드일때에는 없어져서 속도가 빨라지고 값의 타당성 체크가 사라지니 코드가 간결해진다.

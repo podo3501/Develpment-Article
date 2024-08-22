@@ -105,3 +105,9 @@ int __cdecl main(void)
 }
 
 assert의 이점은 디버그 모드일때 자료가 있는지 확인해 보거나 값이 정당한지 확인할때 유용하다. release모드일때에는 없어져서 속도가 빨라지고 값의 타당성 체크가 사라지니 코드가 간결해진다.
+
+gmock을 설치할때의 문제점. nuget 패키지를 선택해서 gmock 1.11.0 버전을 선택해서 설치하면 프리컴파일헤더 pch.h를 추가하겠냐메 에러를 뱉어낸다. 아마도 오픈 소스 라이브러리이기
+때문에 pch를 지원 하지 않는거 같다. 해결책은 현재 google test 프로젝트로 만들면 Microsoft.googletest.v140.windesktop.msvcstl.static.rt-static 이런 nuget 패키지가 자동으로 그 프로젝트에 설치되어 있을 것이다. 이 패키지를 제거하고 gmock 1.11.0을 새로 설치한다. 같이 설치하니까 include가 꼬여서 컴파일이 안되는 것 같다. gmock 1.10.0 버전일때에는 .cc 파일 3개를 pch를 안 쓴다고 지정해 줘야 하는거 같았지만, gmock 1.11.0 버전에서는 따로 설정을 하지 않아도 컴파일이 되었다. 
+요약) 
+1. Microsoft.googletest.v140.windesktop.msvcstl.static.rt-static 제거
+2. gmock 1.11.0 설치
